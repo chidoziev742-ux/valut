@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { AlertCircle, ArrowLeft, RotateCcw, Save, UserRoundPen } from "lucide-react";
-import { studentProfileFields, validateStudentProfile } from "../data/mockProfile.js";
-import "../profile-settings.css";
+import { studentProfileFields, validateStudentProfile } from "../../../data/mockProfile.js";
+import "../../../profile-settings.css";
 
 function Field({ field, value, error, onChange }) {
   const id = `profile-${field.name}`;

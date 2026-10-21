@@ -54,10 +54,10 @@ export default function PlaceholderPage({ route }) {
     <div className="content-wrap">
       <section className="route-placeholder panel" aria-labelledby="placeholder-title">
         <span className="placeholder-icon"><Icon size={24} /></span>
-        <p className="placeholder-eyebrow">{isDeferred ? "DEFERRED FROM MVP" : isAdmin ? "PHASE 8 PLACEHOLDER" : route?.kind === "auth" ? "PHASE 2 PLACEHOLDER" : "FRONTEND PHASE PLACEHOLDER"}</p>
-        <h1 id="placeholder-title">{route?.title ?? "Page not found"}</h1>
-        <p className="placeholder-description">{route ? phaseDescriptions[route.path] : "This route is not part of the current frontend plan."}</p>
-        <p className="placeholder-boundary">Prototype boundary: this page is a labeled placeholder. It does not authenticate users, read or save records, send messages, or connect to a backend.</p>
+        <p className="placeholder-eyebrow">{isDeferred ? "COMING SOON" : isAdmin ? "PHASE 8 PLACEHOLDER" : route?.kind === "auth" ? "PHASE 2 PLACEHOLDER" : "FRONTEND PHASE PLACEHOLDER"}</p>
+        <h1 id="placeholder-title">{isDeferred ? `${route?.title ?? "This feature"} is coming soon` : route?.title ?? "Page not found"}</h1>
+        <p className="placeholder-description">{isDeferred ? "This feature is not available in the current MVP." : route ? phaseDescriptions[route.path] : "This route is not part of the current frontend plan."}</p>
+        {!isDeferred && <p className="placeholder-boundary">Prototype boundary: this page is a labeled placeholder. It does not authenticate users, read or save records, send messages, or connect to a backend.</p>}
 
         {isAdmin && <section className="placeholder-link-group" aria-label="Admin routes">
           <h2>Admin area routes</h2>
@@ -72,8 +72,10 @@ export default function PlaceholderPage({ route }) {
         </section>}
 
         <div className="placeholder-actions">
-          {placeholderActions.slice(0, 5).map((item) => <a key={item.path} href={item.path}><item.icon size={16} />{item.label}</a>)}
-          <a href="/" className="placeholder-back"><ArrowLeft size={16} />Back to dashboard</a>
+          {isDeferred ? <a href="/" className="placeholder-back"><ArrowLeft size={16} />Back to Home</a> : <>
+            {placeholderActions.slice(0, 5).map((item) => <a key={item.path} href={item.path}><item.icon size={16} />{item.label}</a>)}
+            <a href="/" className="placeholder-back"><ArrowLeft size={16} />Back to dashboard</a>
+          </>}
         </div>
       </section>
     </div>

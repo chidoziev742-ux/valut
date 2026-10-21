@@ -14,7 +14,7 @@ export const adminNavigation = [
   { label: "Admin dashboard", path: "/admin" },
   { label: "Student management", path: "/admin/students" },
   { label: "Usage overview", path: "/admin/usage" },
-  { label: "Feedback and surveys", path: "/admin/feedback" },
+  { label: "Communications", path: "/admin/feedback" },
 ];
 
 export const routeTable = [
@@ -27,6 +27,10 @@ export const routeTable = [
   { path: "/reset-password", title: "Reset password", kind: "auth" },
   { path: "/verify", title: "Verification", kind: "auth" },
   { path: "/profile/setup", title: "Student profile setup", kind: "auth" },
+  { path: "/admin/login", title: "Admin sign in", kind: "admin-auth" },
+  { path: "/admin/signup", title: "Admin registration", kind: "admin-auth" },
+  { path: "/admin/forgot-password", title: "Admin password recovery", kind: "admin-auth" },
+  { path: "/admin/reset-password", title: "Admin password reset", kind: "admin-auth" },
   { path: "/documents", title: "My Documents", kind: "student" },
   { path: "/academic-records", title: "Academic Records", kind: "student" },
   { path: "/upload", title: "Upload", kind: "student" },
@@ -40,7 +44,7 @@ export const routeTable = [
   { path: "/admin", title: "Admin dashboard", kind: "admin" },
   { path: "/admin/students", title: "Student management", kind: "admin" },
   { path: "/admin/usage", title: "Usage overview", kind: "admin" },
-  { path: "/admin/feedback", title: "Feedback and surveys", kind: "admin" },
+  { path: "/admin/feedback", title: "Communications", kind: "admin" },
 ];
 
 export function getRoute(pathname) {

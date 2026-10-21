@@ -1,5 +1,5 @@
 import { Bell, ChevronRight, CircleUserRound, HardDrive, LockKeyhole, Settings2, ShieldCheck } from "lucide-react";
-import "../profile-settings.css";
+import "../../../profile-settings.css";
 
 function PreferenceToggle({ id, label, description, checked, onChange }) {
   return (

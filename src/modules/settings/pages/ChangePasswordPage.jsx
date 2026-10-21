@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ArrowLeft, Eye, EyeOff, LockKeyhole, RotateCcw } from "lucide-react";
-import "../profile-settings.css";
+import "../../../profile-settings.css";
 
 const passwordFields = [
   { name: "currentPassword", label: "Current password", autoComplete: "current-password" },

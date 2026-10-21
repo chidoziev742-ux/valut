@@ -19,10 +19,6 @@ export const documentCategories = [
   "Course Materials", "Certificates", "Other",
 ];
 
-export const dashboardRecentDocumentIds = [
-  "doc-admission", "doc-schedule", "doc-id-card", "doc-result-2425", "doc-tuition",
-];
-
 export function filterAndSortDocuments({
   documents = mockDocuments,
   query = "",

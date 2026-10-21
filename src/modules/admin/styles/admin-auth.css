@@ -1,0 +1,10 @@
+.admin-auth-notice { display: flex; align-items: flex-start; gap: 7px; margin: 0 0 15px; padding: 10px 11px; border: 1px solid #eadbb9; border-radius: 8px; color: #604e2e; background: #fbf5e8; font-size: 11px; line-height: 16px; }
+.admin-auth-notice svg { flex: 0 0 auto; margin-top: 1px; }
+.admin-auth-brand-label { align-self: center; margin-left: 2px; padding: 4px 7px; border: 1px solid #eadbb9; border-radius: 999px; color: #674c20; background: #fbf5e8; font-size: 9px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.admin-auth-page .auth-aside { background: linear-gradient(150deg, #153f33, #0b3028 76%); }
+.admin-auth-page .auth-aside-icon { color: #e8c25c; }
+.admin-auth-links { display: grid; justify-items: center; gap: 9px; margin-top: -2px; color: #647068; font-size: 12px; text-align: center; }
+.admin-auth-links > span { color: #647068; }
+.admin-auth-links a { color: #315545; font-weight: 650; text-decoration: none; }
+.admin-auth-links a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.admin-auth-links a:focus-visible { outline: 2px solid #245344; outline-offset: 3px; border-radius: 2px; }

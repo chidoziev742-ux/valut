@@ -2,7 +2,7 @@ import {
   Bell, BookOpen, ChevronDown, CircleUserRound, File, Folder, Search,
   GraduationCap, Home, LogOut, Settings, Sparkles, Target, Upload, Users,
 } from "lucide-react";
-import { adminNavigation, studentNavigation } from "../routeConfig.js";
+import { studentNavigation } from "../routeConfig.js";
 
 function Brand({ compact = false }) {
   return (
@@ -50,11 +50,6 @@ function Sidebar({ currentPath }) {
       <nav aria-label="Account navigation" className="side-nav secondary-nav">
         {account.map((item) => <RouteLink key={item.path} {...item} icon={studentIcons[item.label]} currentPath={currentPath} />)}
       </nav>
-      <div className="sidebar-divider admin-divider" />
-      <nav aria-label="Admin navigation" className="side-nav admin-nav">
-        <p className="nav-group-label"><Users size={15} /> Admin area</p>
-        {adminNavigation.map((item) => <RouteLink key={item.path} {...item} icon={Users} currentPath={currentPath} />)}
-      </nav>
       <div className="sidebar-note"><Sparkles size={17} /><p>Organize today for a brighter tomorrow.</p><span /></div>
       <div className="side-botanical" aria-hidden="true"><span /><span /><span /></div>
     </aside>
@@ -101,6 +96,7 @@ function MobileNavigation({ currentPath }) {
     { label: "Home", path: "/", icon: Home },
     { label: "Documents", path: "/documents", icon: File },
     { label: "Goals", path: "/goals", icon: Target, deferred: true },
+    { label: "Reminders", path: "/reminders", icon: Bell, deferred: true },
     { label: "Profile", path: "/profile", icon: CircleUserRound },
   ];
   return (

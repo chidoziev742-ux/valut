@@ -6,13 +6,13 @@ const icons = {
   students: Users,
   documents: FileText,
   activity: BarChart3,
-  feedback: MessageSquare,
+  communications: MessageSquare,
 };
 
 const destinations = [
   { href: "/admin/students", title: "Student management", description: "Review the planned student directory and management tools.", icon: Users },
   { href: "/admin/usage", title: "Usage overview", description: "Explore the planned platform usage overview.", icon: BarChart3 },
-  { href: "/admin/feedback", title: "Feedback and surveys", description: "Review the planned feedback and survey workspace.", icon: MessageSquare },
+  { href: "/admin/feedback", title: "Communications", description: "Compose announcements and review prototype communication history.", icon: MessageSquare },
 ];
 
 function MetricCard({ metric }) {

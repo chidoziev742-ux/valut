@@ -5,7 +5,6 @@ export const initialStudentProfile = {
   department: "Computer Science",
   program: "BSc Computer Science",
   studyYear: "Year 3",
-  matriculationNumber: "",
   academicSession: "2025/2026",
   email: "chido@example.com",
 };
@@ -23,12 +22,11 @@ export const studentProfileFields = [
   { name: "department", label: "Department" },
   { name: "program", label: "Course or programme", autoComplete: "organization-title" },
   { name: "studyYear", label: "Academic level", placeholder: "e.g. Year 3 or 300 level" },
-  { name: "matriculationNumber", label: "Matriculation number" },
   { name: "academicSession", label: "Academic session", placeholder: "e.g. 2025/2026" },
 ];
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const profileFields = ["fullName", "university", "faculty", "department", "program", "studyYear", "matriculationNumber", "academicSession", "email"];
+const profileFields = ["fullName", "university", "faculty", "department", "program", "studyYear", "academicSession", "email"];
 
 export function validateStudentProfile(values) {
   const errors = {};

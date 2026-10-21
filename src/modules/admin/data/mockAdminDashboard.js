@@ -4,7 +4,7 @@ export const adminDashboardSample = {
     { id: "students", label: "Students", value: "1,284", detail: "Illustrative registered students", icon: "students" },
     { id: "documents", label: "Documents", value: "8,420", detail: "Illustrative document records", icon: "documents" },
     { id: "activity", label: "Platform activity", value: "246", detail: "Illustrative active sessions", icon: "activity" },
-    { id: "feedback", label: "Feedback", value: "37", detail: "Illustrative submissions", icon: "feedback" },
+    { id: "communications", label: "Communications", value: "2", detail: "Illustrative sample history entries", icon: "communications" },
   ],
   activity: [
     { label: "May", value: 42 },

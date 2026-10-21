@@ -1,6 +1,6 @@
 import { ArrowRight, CircleUserRound, Pencil, Settings2 } from "lucide-react";
-import { studentProfileFields } from "../data/mockProfile.js";
-import "../profile-settings.css";
+import { studentProfileFields } from "../../../data/mockProfile.js";
+import "../../../profile-settings.css";
 
 export default function ProfilePage({ profile }) {
   return (

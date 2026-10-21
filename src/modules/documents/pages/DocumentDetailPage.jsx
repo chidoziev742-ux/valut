@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   ArrowLeft, Archive, CalendarDays, Download, File, FileImage, FileText,
-  FileType2, Folder, Pencil, RotateCcw, Trash2,
+  FileType2, Folder, Pencil, RotateCcw, Share2, Trash2,
 } from "lucide-react";
 import { canDownloadDocument, documentCategories } from "../data/mockDocuments.js";
 import { DeleteDialog, RenameDialog } from "../components/DocumentOperationDialogs.jsx";
@@ -162,6 +162,7 @@ export default function DocumentDetailPage({ document, documentId, folders, onNa
           <section className="detail-actions-panel panel" aria-labelledby="actions-heading">
             <div className="detail-section-heading"><div><p className="library-eyebrow">ORGANIZE</p><h2 id="actions-heading">Actions</h2></div></div>
             <button className="detail-action-button" type="button" onClick={() => setOperation("rename")}><Pencil size={16} /> Rename</button>
+            <button className="detail-action-button detail-share-unavailable" type="button" aria-disabled="true" onClick={() => onNotice("Document sharing is planned for a future version.")}><Share2 size={16} /> <span>Share</span><span className="detail-unavailable-badge">Unavailable at the moment</span></button>
             <label className="detail-action-label" htmlFor="detail-folder">Move to folder</label>
             <select className="detail-action-select" id="detail-folder" value={document.folderId ?? ""} onChange={(event) => moveDocument(event.target.value || null)}><option value="">Unfiled</option>{folders.map((folder) => <option key={folder.id} value={folder.id}>{folder.name}</option>)}</select>
             <button className="detail-action-button" type="button" disabled={!attached} onClick={download}><Download size={16} /> {attached ? "Download selected file" : "Download unavailable"}</button>

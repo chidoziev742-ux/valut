@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ArrowLeft, ArrowRight, Eye, EyeOff, GraduationCap, LockKeyhole, ShieldCheck, Sparkles } from "lucide-react";
-import "../auth.css";
+import "../styles/auth.css";
 
 const screenCopy = {
   "/sign-up": { eyebrow: "START YOUR VAULT", title: "Create your account", intro: "Bring your university documents and academic records together." },
@@ -19,12 +19,12 @@ const authLinks = {
 const fieldSets = {
   "/sign-up": [
     { name: "fullName", label: "Full name", autoComplete: "name" },
-    { name: "email", label: "University email", type: "email", autoComplete: "email" },
+    { name: "email", label: "Your email address", type: "email", autoComplete: "email" },
     { name: "password", label: "Create password", type: "password", autoComplete: "new-password", help: "Use at least 8 characters." },
     { name: "confirmPassword", label: "Confirm password", type: "password", autoComplete: "new-password" },
   ],
   "/login": [
-    { name: "email", label: "Email address", type: "email", autoComplete: "email" },
+    { name: "email", label: "Your email address", type: "email", autoComplete: "email" },
     { name: "password", label: "Password", type: "password", autoComplete: "current-password" },
   ],
   "/forgot-password": [{ name: "email", label: "Email address", type: "email", autoComplete: "email" }],

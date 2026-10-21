@@ -160,6 +160,10 @@
 .detail-action-button:disabled { color: #6a746e; background: #f1f1ec; cursor: not-allowed; }
 .detail-action-label { margin: 3px 0 -4px; color: #53635a; font-size: 11px; font-weight: 600; }
 .detail-action-select { width: 100%; min-width: 0; min-height: 40px; padding: 0 10px; border: 1px solid #d7ddd5; border-radius: 8px; color: #26372e; background: white; font-size: 12px; }
+.detail-share-unavailable { color: #66716a; background: #f5f4ef; cursor: not-allowed; }
+.detail-share-unavailable:hover { border-color: #d7ddd5; background: #f5f4ef; }
+.detail-share-unavailable:focus-visible { outline: 2px solid #245344; outline-offset: 2px; }
+.detail-unavailable-badge { margin-left: auto; color: #68746c; font-size: 10px; font-weight: 550; white-space: nowrap; }
 .detail-delete-action { color: #983c33; }
 .detail-delete-action:hover { border-color: #d7aaa3 !important; background: #fbefec !important; }
 .detail-action-note { margin-top: 3px; }

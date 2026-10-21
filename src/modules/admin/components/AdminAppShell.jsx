@@ -20,7 +20,7 @@ function AdminLinks({ currentPath, compact = false }) {
         key={item.path}
       >
         <Icon size={compact ? 18 : 19} aria-hidden="true" />
-        <span>{item.path === "/admin" ? "Dashboard" : item.path === "/admin/students" ? "Students" : item.path === "/admin/usage" ? "Usage" : "Feedback"}</span>
+        <span>{item.path === "/admin" ? "Dashboard" : item.path === "/admin/students" ? "Students" : item.path === "/admin/usage" ? "Usage" : "Communications"}</span>
       </a>
     );
   });
@@ -64,7 +64,7 @@ export default function AdminAppShell({ currentPath, children }) {
           <AdminLinks currentPath={currentPath} compact />
         </nav>
         <main className="admin-main-content">
-          <div className="admin-shell-context"><Shield size={14} aria-hidden="true" /> Prototype workspace · no real admin access <a href="/">Return to student preview <ArrowLeft size={13} aria-hidden="true" /></a></div>
+          <div className="admin-shell-context"><Shield size={14} aria-hidden="true" /> Prototype workspace · no real admin access <a className="admin-auth-context-link" href="/admin/login">Admin sign-in preview</a><a href="/">Return to student preview <ArrowLeft size={13} aria-hidden="true" /></a></div>
           {children}
         </main>
         <footer className="admin-shell-footer"><BookOpen size={14} aria-hidden="true" /> Student Vault Admin frontend prototype</footer>
