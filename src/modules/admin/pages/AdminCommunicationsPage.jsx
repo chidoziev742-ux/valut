@@ -1,72 +1,64 @@
-import { useMemo, useState } from "react";
-import {
-  Bell, CalendarDays, Check, Eye, Mail, Megaphone, Search, Send,
-  UsersRound, X,
-} from "lucide-react";
-import { useDialogFocus } from "../../../hooks/useDialogFocus.js";
-import { adminStudentLevels } from "../data/mockAdminStudents.js";
-import {
-  communicationStatuses,
-  mockAdminCommunications,
-} from "../data/mockAdminCommunications.js";
+import { useEffect, useState } from "react";
+import { Archive, Bell, CalendarDays, Check, Eye, Mail, Megaphone, RotateCcw, Search, Send, UsersRound } from "lucide-react";
+import { apiRequest } from "../../../api/apiClient.js";
 import "../styles/admin-communications.css";
 
-const emptyDraft = { subject: "", message: "", recipientMode: "all", recipientGroup: adminStudentLevels[0], channels: ["Email"] };
+const emptyDraft = { subject: "", message: "", recipientMode: "all", recipientIds: [], channel: "in_app" };
+const numberFormat = new Intl.NumberFormat("en");
 
 function formatDate(value) {
-  return new Intl.DateTimeFormat("en", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" })
-    .format(new Date(`${value}T12:00:00Z`));
-}
-
-function recipientLabel(draft) {
-  return draft.recipientMode === "all" ? "All students" : draft.recipientGroup;
-}
-
-function AnnouncementPreview({ draft, onClose, onSaveDraft, onMarkSent }) {
-  const dialogRef = useDialogFocus(onClose);
-  return (
-    <div className="admin-communications-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
-      <section ref={dialogRef} className="admin-communications-preview" role="dialog" aria-modal="true" aria-labelledby="announcement-preview-title">
-        <button className="admin-communications-close" type="button" onClick={onClose} aria-label="Close announcement preview"><X size={19} /></button>
-        <span className="admin-communications-preview-icon" aria-hidden="true"><Eye size={21} /></span>
-        <p className="admin-communications-eyebrow">PROTOTYPE PREVIEW</p>
-        <h2 id="announcement-preview-title">{draft.subject}</h2>
-        <dl className="admin-communications-preview-meta">
-          <div><dt>Recipients</dt><dd>{recipientLabel(draft)}</dd></div>
-          <div><dt>Channels</dt><dd>{draft.channels.join(" and ")}</dd></div>
-        </dl>
-        <div className="admin-communications-preview-body"><p>{draft.message}</p></div>
-        <p className="admin-communications-boundary">Preview only. Confirming a prototype action will not deliver email or in-app notifications.</p>
-        <div className="admin-communications-preview-actions">
-          <button className="admin-communications-button secondary" type="button" onClick={onClose}>Edit announcement</button>
-          <button className="admin-communications-button secondary" type="button" onClick={onSaveDraft}>Save as draft</button>
-          <button className="admin-communications-button primary" type="button" onClick={onMarkSent}><Send size={15} /> Mark as sent · prototype</button>
-        </div>
-      </section>
-    </div>
-  );
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? "Date unavailable"
+    : new Intl.DateTimeFormat("en", { dateStyle: "medium", timeStyle: "short" }).format(date);
 }
 
 function StatusBadge({ status }) {
-  return <span className={`admin-communications-status status-${status.toLowerCase()}`}><span aria-hidden="true" />{status}<small>sample</small></span>;
+  return <span className="admin-communications-status status-sent"><span aria-hidden="true" />{status}</span>;
 }
 
-export default function AdminCommunicationsPage() {
-  const [history, setHistory] = useState(mockAdminCommunications);
+export default function AdminCommunicationsPage({ csrfToken }) {
   const [draft, setDraft] = useState(emptyDraft);
+  const [students, setStudents] = useState([]);
+  const [history, setHistory] = useState({ communications: [], total: 0 });
+  const [request, setRequest] = useState({ status: "loading", error: "" });
   const [errors, setErrors] = useState({});
-  const [previewOpen, setPreviewOpen] = useState(false);
   const [notice, setNotice] = useState("");
   const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [archiveFilter, setArchiveFilter] = useState("active");
+  const [previewOpen, setPreviewOpen] = useState(false);
 
-  const visibleHistory = useMemo(() => {
-    const term = query.trim().toLocaleLowerCase();
-    return history.filter((item) => {
-      const searchable = [item.subject, item.message, item.recipients, ...item.channels].join(" ").toLocaleLowerCase();
-      return (!term || searchable.includes(term)) && (!statusFilter || item.status === statusFilter);
-    });
-  }, [history, query, statusFilter]);
+  const loadData = () => {
+    setRequest({ status: "loading", error: "" });
+    Promise.all([
+      apiRequest("/api/admin/students?pageSize=100&status=active"),
+      apiRequest(`/api/admin/communications?pageSize=50&archive=${archiveFilter}${query.trim() ? `&q=${encodeURIComponent(query.trim())}` : ""}`),
+    ])
+      .then(([studentPayload, historyPayload]) => {
+        setStudents(studentPayload.students ?? []);
+        setHistory(historyPayload);
+        setRequest({ status: "loaded", error: "" });
+      })
+      .catch((error) => setRequest({ status: "error", error: error.message || "We couldn't load communications." }));
+  };
+
+  useEffect(loadData, [query, archiveFilter]);
+
+  const updateArchive = async (communication, archived) => {
+    const action = archived ? "archive" : "restore";
+    if (archived && !window.confirm(`Archive "${communication.subject}"? It will be hidden from active history but preserved.`)) return;
+    setNotice("");
+    try {
+      await apiRequest(`/api/admin/communications/${encodeURIComponent(communication.id)}/${action}`, {
+        method: "PATCH",
+        csrfToken,
+      });
+      setNotice(archived ? "Communication archived." : "Communication restored.");
+      loadData();
+    } catch (error) {
+      setNotice(error.message || `The communication could not be ${action}d.`);
+    }
+  };
 
   const updateDraft = (field, value) => {
     setDraft((current) => ({ ...current, [field]: value }));
@@ -74,142 +66,110 @@ export default function AdminCommunicationsPage() {
     setNotice("");
   };
 
-  const toggleChannel = (channel) => {
-    setDraft((current) => ({
-      ...current,
-      channels: current.channels.includes(channel)
-        ? current.channels.filter((value) => value !== channel)
-        : [...current.channels, channel],
-    }));
-    setErrors((current) => ({ ...current, channels: "" }));
-    setNotice("");
-  };
-
-  const openPreview = (event) => {
-    event.preventDefault();
+  const validate = () => {
     const nextErrors = {};
     if (!draft.subject.trim()) nextErrors.subject = "Enter an announcement subject.";
-    else if (draft.subject.trim().length > 120) nextErrors.subject = "Keep the subject to 120 characters or fewer.";
+    if (draft.subject.trim().length > 120) nextErrors.subject = "Keep the subject to 120 characters or fewer.";
     if (!draft.message.trim()) nextErrors.message = "Enter an announcement message.";
-    else if (draft.message.trim().length > 3000) nextErrors.message = "Keep the message to 3,000 characters or fewer.";
-    if (!draft.channels.length) nextErrors.channels = "Choose at least one delivery channel.";
+    if (draft.message.trim().length > 2000) nextErrors.message = "Keep the message to 2,000 characters or fewer.";
+    if (draft.recipientMode === "selected" && !draft.recipientIds.length) nextErrors.recipientIds = "Select at least one active student.";
     setErrors(nextErrors);
-    setNotice("");
-    if (Object.keys(nextErrors).length) {
-      document.getElementById(`communication-${Object.keys(nextErrors)[0]}`)?.focus();
-      return;
-    }
-    setPreviewOpen(true);
+    return !Object.keys(nextErrors).length;
   };
 
-  const recordAction = (status) => {
-    const now = new Date().toISOString().slice(0, 10);
-    const record = {
-      id: globalThis.crypto?.randomUUID?.() ?? `communication-${Date.now()}`,
-      subject: draft.subject.trim(),
-      message: draft.message.trim(),
-      recipients: recipientLabel(draft),
-      channels: [...draft.channels],
-      status,
-      createdAt: now,
-    };
-    setHistory((current) => [record, ...current]);
-    setDraft(emptyDraft);
-    setErrors({});
+  const sendAnnouncement = async () => {
     setPreviewOpen(false);
-    setNotice(status === "Draft"
-      ? "Draft added to this prototype session. It was not delivered."
-      : "Marked Sent in prototype history only. No email or in-app notification was delivered.");
+    setNotice("");
+    try {
+      const payload = await apiRequest("/api/admin/communications", {
+        method: "POST",
+        csrfToken,
+        body: {
+          subject: draft.subject.trim(),
+          message: draft.message.trim(),
+          recipientMode: draft.recipientMode,
+          recipientIds: draft.recipientIds,
+          channel: draft.channel,
+        },
+      });
+      setDraft(emptyDraft);
+      setNotice(`Announcement sent to ${numberFormat.format(payload.communication.recipientCount)} students.`);
+      loadData();
+    } catch (error) {
+      setNotice(error.message || "The announcement could not be sent.");
+    }
   };
 
-  const openDraft = (item) => {
-    const isGroup = item.recipients !== "All students";
-    setDraft({
-      subject: item.subject,
-      message: item.message,
-      recipientMode: isGroup ? "group" : "all",
-      recipientGroup: isGroup ? item.recipients : adminStudentLevels[0],
-      channels: [...item.channels],
-    });
-    setErrors({});
-    setNotice("Sample draft loaded into the composer. Changes remain in this session.");
-    document.getElementById("communication-compose-title")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    document.getElementById("communication-subject")?.focus({ preventScroll: true });
+  const toggleStudent = (id) => {
+    setDraft((current) => ({
+      ...current,
+      recipientIds: current.recipientIds.includes(id)
+        ? current.recipientIds.filter((value) => value !== id)
+        : [...current.recipientIds, id],
+    }));
+    setErrors((current) => ({ ...current, recipientIds: "" }));
   };
-
-  const clearHistoryFilters = () => { setQuery(""); setStatusFilter(""); };
 
   return (
     <div className="content-wrap admin-communications-page">
       <header className="admin-communications-heading">
-        <div><p className="admin-communications-eyebrow">ADMIN AREA · COMMUNICATIONS</p><h1>Communications</h1><p>Prepare announcements and review fictional communication history.</p></div>
-        <span className="admin-communications-badge">Frontend prototype</span>
+        <div><p className="admin-communications-eyebrow">ADMIN AREA · COMMUNICATIONS</p><h1>Communications</h1><p>Send in-app announcements and email updates, with delivery tracking.</p></div>
+        <span className="admin-communications-badge">In-app + email</span>
       </header>
-
-      <aside className="admin-communications-notice" aria-label="Prototype limitation">
-        <span aria-hidden="true">i</span><p><strong>Illustrative only.</strong> This workspace uses fictional sample data. It cannot deliver email, send in-app notifications, or access live student accounts.</p>
-      </aside>
-
       {notice && <p className="admin-communications-feedback" role="status"><Check size={16} />{notice}</p>}
 
       <section className="admin-communications-panel" aria-labelledby="communication-compose-title">
         <div className="admin-communications-panel-heading">
           <span className="admin-communications-section-icon" aria-hidden="true"><Megaphone size={19} /></span>
-          <div><p className="admin-communications-eyebrow">COMPOSE</p><h2 id="communication-compose-title">New announcement</h2><p>Draft and preview a message for the selected audience.</p></div>
+          <div><p className="admin-communications-eyebrow">COMPOSE</p><h2 id="communication-compose-title">New announcement</h2><p>Send a message to all active students or selected students.</p></div>
         </div>
-        <form className="admin-communications-form" onSubmit={openPreview} noValidate>
+        <form className="admin-communications-form" onSubmit={(event) => { event.preventDefault(); if (validate()) setPreviewOpen(true); }} noValidate>
           <label className="admin-communications-field" htmlFor="communication-subject">Subject or title
-            <input id="communication-subject" value={draft.subject} maxLength={120} aria-invalid={Boolean(errors.subject)} aria-describedby={errors.subject ? "communication-subject-error" : undefined} onChange={(event) => updateDraft("subject", event.target.value)} />
-            {errors.subject && <small id="communication-subject-error" role="alert">{errors.subject}</small>}
+            <input id="communication-subject" value={draft.subject} maxLength={120} onChange={(event) => updateDraft("subject", event.target.value)} />
+            {errors.subject && <small role="alert">{errors.subject}</small>}
+          </label>
+          <label className="admin-communications-field" htmlFor="communication-channel">Delivery channel
+            <select id="communication-channel" value={draft.channel} onChange={(event) => updateDraft("channel", event.target.value)}>
+              <option value="in_app">In-app notification</option>
+              <option value="email">Email</option>
+              <option value="both">In-app notification and email</option>
+            </select>
           </label>
           <label className="admin-communications-field" htmlFor="communication-message">Message
-            <textarea id="communication-message" rows="5" maxLength={3000} value={draft.message} aria-invalid={Boolean(errors.message)} aria-describedby={errors.message ? "communication-message-error" : "communication-message-hint"} onChange={(event) => updateDraft("message", event.target.value)} />
-            {errors.message ? <small id="communication-message-error" role="alert">{errors.message}</small> : <small id="communication-message-hint">Up to 3,000 characters.</small>}
+            <textarea id="communication-message" rows="5" maxLength={2000} value={draft.message} onChange={(event) => updateDraft("message", event.target.value)} />
+            {errors.message ? <small role="alert">{errors.message}</small> : <small>Up to 2,000 characters.</small>}
           </label>
-          <div className="admin-communications-options">
-            <label className="admin-communications-field" htmlFor="communication-recipient">Recipients
-              <select id="communication-recipient" value={draft.recipientMode} onChange={(event) => updateDraft("recipientMode", event.target.value)}>
-                <option value="all">All students</option><option value="group">Selected academic level</option>
-              </select>
-            </label>
-            {draft.recipientMode === "group" && <label className="admin-communications-field" htmlFor="communication-group">Academic level
-              <select id="communication-group" value={draft.recipientGroup} onChange={(event) => updateDraft("recipientGroup", event.target.value)}>
-                {adminStudentLevels.map((group) => <option key={group} value={group}>{group}</option>)}
-              </select>
-            </label>}
-          </div>
-          <fieldset className="admin-communications-channels" aria-describedby={errors.channels ? "communication-channels-error" : "communication-channels-hint"}>
-            <legend>Delivery channels</legend>
-            <label><input type="checkbox" checked={draft.channels.includes("Email")} onChange={() => toggleChannel("Email")} /><Mail size={17} aria-hidden="true" /><span>Email</span></label>
-            <label><input type="checkbox" checked={draft.channels.includes("In-app notification")} onChange={() => toggleChannel("In-app notification")} /><Bell size={17} aria-hidden="true" /><span>In-app notification</span></label>
-            {errors.channels ? <small id="communication-channels-error" role="alert">{errors.channels}</small> : <small id="communication-channels-hint">Select one or both. Delivery is not connected.</small>}
-          </fieldset>
-          <div className="admin-communications-form-footer"><p><UsersRound size={15} aria-hidden="true" /> Audience groups are fictional academic-level examples.</p><button className="admin-communications-button primary" type="submit"><Eye size={16} /> Preview announcement</button></div>
+          <label className="admin-communications-field" htmlFor="communication-recipient">Recipients
+            <select id="communication-recipient" value={draft.recipientMode} onChange={(event) => updateDraft("recipientMode", event.target.value)}>
+              <option value="all">All active students</option><option value="selected">Selected active students</option>
+            </select>
+          </label>
+          {draft.recipientMode === "selected" && <fieldset className="admin-communications-recipient-list">
+            <legend>Select students</legend>
+            {students.length ? students.map((student) => <label key={student.id}><input type="checkbox" checked={draft.recipientIds.includes(student.id)} onChange={() => toggleStudent(student.id)} /><span>{student.name}</span><small>{student.email}</small></label>) : <p>No active students are available.</p>}
+            {errors.recipientIds && <small role="alert">{errors.recipientIds}</small>}
+          </fieldset>}
+          <div className="admin-communications-form-footer"><p>{draft.channel === "in_app" ? <Bell size={15} aria-hidden="true" /> : <Mail size={15} aria-hidden="true" />} {draft.channel === "in_app" ? "Delivered in the student notification centre." : "Email delivery is queued and tracked per recipient."}</p><button className="admin-communications-button primary" type="submit"><Eye size={16} /> Preview announcement</button></div>
         </form>
       </section>
 
       <section className="admin-communications-panel history-panel" aria-labelledby="communication-history-title">
         <div className="admin-communications-panel-heading history-heading">
           <span className="admin-communications-section-icon" aria-hidden="true"><CalendarDays size={19} /></span>
-          <div><p className="admin-communications-eyebrow">HISTORY</p><h2 id="communication-history-title">Communication history</h2><p>Sample statuses do not represent real delivery.</p></div>
+          <div><p className="admin-communications-eyebrow">HISTORY</p><h2 id="communication-history-title">Communication history</h2><p>Previously sent in-app announcements.</p></div>
         </div>
         <div className="admin-communications-filters">
-          <label className="admin-communications-search" htmlFor="communication-search"><span className="sr-only">Search communications</span><Search size={17} aria-hidden="true" /><input id="communication-search" type="search" placeholder="Search subject, message, recipient…" value={query} onChange={(event) => setQuery(event.target.value)} /></label>
-          <label className="admin-communications-filter" htmlFor="communication-status">Status
-            <select id="communication-status" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}><option value="">All statuses</option>{communicationStatuses.map((status) => <option key={status}>{status}</option>)}</select>
+          <label className="admin-communications-search" htmlFor="communication-search"><span className="sr-only">Search communications</span><Search size={17} aria-hidden="true" /><input id="communication-search" type="search" placeholder="Search subject or message…" value={query} onChange={(event) => setQuery(event.target.value)} /></label>
+          <label className="admin-communications-filter" htmlFor="communication-archive-filter">History
+            <select id="communication-archive-filter" value={archiveFilter} onChange={(event) => setArchiveFilter(event.target.value)}>
+              <option value="active">Active</option><option value="archived">Archived</option><option value="all">All history</option>
+            </select>
           </label>
-          <button className="admin-communications-clear" type="button" onClick={clearHistoryFilters} disabled={!query && !statusFilter}>Clear filters</button>
         </div>
-        <p className="admin-communications-count" role="status" aria-live="polite">Showing {visibleHistory.length} of {history.length} illustrative communications</p>
-        {visibleHistory.length ? <ul className="admin-communications-history-list">
-          {visibleHistory.map((item) => <li className="admin-communications-history-item" key={item.id}>
-            <div className="admin-communications-history-main"><div className="admin-communications-history-title"><h3>{item.subject}</h3><StatusBadge status={item.status} /></div><p>{item.message}</p><div className="admin-communications-history-meta"><span>{item.recipients}</span><span>{item.channels.join(" · ")}</span><time dateTime={item.createdAt}>{formatDate(item.createdAt)}</time></div></div>
-            {item.status === "Draft" && <button className="admin-communications-open-draft" type="button" onClick={() => openDraft(item)}>Open draft</button>}
-          </li>)}
-        </ul> : <div className="admin-communications-empty"><span aria-hidden="true"><Search size={20} /></span><h3>{history.length ? "No matching communications" : "No communication history"}</h3><p>{history.length ? "Try changing the search or status filter." : "Draft announcements and prototype actions will appear here."}</p></div>}
+        {request.status === "error" ? <p className="admin-communications-empty" role="alert">{request.error}</p> : history.communications.length ? <ul className="admin-communications-history-list">{history.communications.map((item) => <li className="admin-communications-history-item" key={item.id}><div className="admin-communications-history-main"><div className="admin-communications-history-title"><h3>{item.subject}</h3><StatusBadge status={item.status} />{item.archivedAt && <span className="admin-communications-archived-label">Archived</span>}</div><p>{item.message}</p><div className="admin-communications-history-meta"><span>{item.recipients}</span><span>{item.channels.join(" + ")}</span>{item.emailDelivery && <span>{item.emailDelivery.sent} sent · {item.emailDelivery.failed} failed · {item.emailDelivery.pending} pending</span>}<time dateTime={item.createdAt}>{formatDate(item.createdAt)}</time></div></div><div className="admin-communications-history-actions">{item.archivedAt ? <button className="admin-communications-button secondary" type="button" onClick={() => updateArchive(item, false)}><RotateCcw size={14} /> Restore</button> : <button className="admin-communications-button secondary" type="button" onClick={() => updateArchive(item, true)}><Archive size={14} /> Archive</button>}</div></li>)}</ul> : <div className="admin-communications-empty"><span aria-hidden="true"><Search size={20} /></span><h3>No communication history</h3><p>Sent announcements will appear here.</p></div>}
       </section>
 
-      {previewOpen && <AnnouncementPreview draft={draft} onClose={() => setPreviewOpen(false)} onSaveDraft={() => recordAction("Draft")} onMarkSent={() => recordAction("Sent")} />}
+      {previewOpen && <div className="admin-communications-backdrop"><section className="admin-communications-preview" role="dialog" aria-modal="true" aria-labelledby="announcement-preview-title"><span className="admin-communications-preview-icon" aria-hidden="true"><Send size={21} /></span><p className="admin-communications-eyebrow">CONFIRM SEND</p><h2 id="announcement-preview-title">{draft.subject}</h2><p>{draft.message}</p><p>Recipients: <strong>{draft.recipientMode === "all" ? "All active students" : `${draft.recipientIds.length} selected students`}</strong></p><p>Delivery: <strong>{draft.channel === "both" ? "In-app notification and email" : draft.channel === "email" ? "Email" : "In-app notification"}</strong></p><div className="admin-communications-preview-actions"><button className="admin-communications-button secondary" type="button" onClick={() => setPreviewOpen(false)}>Edit announcement</button><button className="admin-communications-button primary" type="button" onClick={sendAnnouncement}><Send size={15} /> Send announcement</button></div></section></div>}
     </div>
   );
 }

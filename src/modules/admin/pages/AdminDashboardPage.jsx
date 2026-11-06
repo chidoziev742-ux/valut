@@ -1,5 +1,6 @@
 import { ArrowUpRight, BarChart3, FileText, MessageSquare, Users } from "lucide-react";
-import { adminDashboardSample } from "../data/mockAdminDashboard.js";
+import { useEffect, useState } from "react";
+import { apiRequest } from "../../../api/apiClient.js";
 import "../styles/admin.css";
 
 const icons = {
@@ -10,9 +11,9 @@ const icons = {
 };
 
 const destinations = [
-  { href: "/admin/students", title: "Student management", description: "Review the planned student directory and management tools.", icon: Users },
-  { href: "/admin/usage", title: "Usage overview", description: "Explore the planned platform usage overview.", icon: BarChart3 },
-  { href: "/admin/feedback", title: "Communications", description: "Compose announcements and review prototype communication history.", icon: MessageSquare },
+  { href: "/admin/students", title: "Student management", description: "Manage student records.", icon: Users },
+  { href: "/admin/usage", title: "Usage overview", description: "Review platform usage.", icon: BarChart3 },
+  { href: "/admin/feedback", title: "Communications", description: "Compose and review announcements.", icon: MessageSquare },
 ];
 
 function MetricCard({ metric }) {
@@ -27,57 +28,96 @@ function MetricCard({ metric }) {
   );
 }
 
-function ActivityChart({ entries }) {
-  const highest = Math.max(...entries.map(({ value }) => value), 1);
+function formatBytes(bytes) {
+  const value = Number(bytes);
+  if (!Number.isFinite(value) || value <= 0) return "0 B";
+  const units = ["B", "KB", "MB", "GB", "TB"];
+  const unitIndex = Math.min(Math.floor(Math.log(value) / Math.log(1024)), units.length - 1);
+  return `${(value / (1024 ** unitIndex)).toFixed(unitIndex ? 1 : 0)} ${units[unitIndex]}`;
+}
+
+function formatDate(value) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? "Date unavailable"
+    : new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(date);
+}
+
+function RecentRegistrations({ entries }) {
   return (
-    <section className="admin-panel admin-activity" aria-labelledby="admin-activity-title">
+    <section className="admin-panel admin-activity" aria-labelledby="admin-registrations-title">
       <div className="admin-panel-heading">
-        <div><p className="admin-kicker">ILLUSTRATIVE SAMPLE</p><h2 id="admin-activity-title">Platform activity</h2></div>
-        <span className="admin-period">Last 6 months · sample</span>
+        <div><p className="admin-kicker">RECENT REGISTRATIONS</p><h2 id="admin-registrations-title">Recent registrations</h2></div>
+        <span className="admin-period">Latest student accounts</span>
       </div>
       {entries.length ? (
-        <div className="admin-chart" role="img" aria-label={`Illustrative platform activity sample: ${entries.map(({ label, value }) => `${label} ${value}`).join(", ")}`}>
-          <div className="admin-chart-grid" aria-hidden="true"><i /><i /><i /><i /></div>
-          <div className="admin-chart-bars" aria-hidden="true">
-            {entries.map(({ label, value }) => (
-              <div className="admin-chart-column" key={label}>
-                <span className="admin-chart-value">{value}</span>
-                <span className="admin-chart-bar" style={{ height: `${Math.max(8, (value / highest) * 100)}%` }} />
-                <span className="admin-chart-label">{label}</span>
-              </div>
-            ))}
-          </div>
+        <div className="admin-registration-list">
+          {entries.map((entry) => (
+            <div className="admin-registration" key={entry.id}>
+              <span className="admin-registration-icon" aria-hidden="true"><Users size={16} /></span>
+              <span className="admin-registration-copy">
+                <strong>{entry.fullName || entry.email}</strong>
+                <small>{entry.fullName ? entry.email : "Student account"}</small>
+              </span>
+              <time dateTime={entry.createdAt}>{formatDate(entry.createdAt)}</time>
+            </div>
+          ))}
         </div>
-      ) : <p className="admin-chart-empty">No illustrative activity samples are available.</p>}
-      <p className="admin-chart-note">Example activity counts only. No live usage is measured.</p>
+      ) : <p className="admin-chart-empty">No student registrations yet.</p>}
     </section>
   );
 }
 
 export default function AdminDashboardPage() {
-  const { metrics, activity } = adminDashboardSample;
+  const [dashboard, setDashboard] = useState(null);
+  const [request, setRequest] = useState({ status: "loading", error: "" });
+
+  useEffect(() => {
+    let active = true;
+    setRequest({ status: "loading", error: "" });
+    apiRequest("/api/admin/dashboard")
+      .then((payload) => {
+        if (!active) return;
+        setDashboard(payload);
+        setRequest({ status: "loaded", error: "" });
+      })
+      .catch((error) => {
+        if (active) setRequest({
+          status: "error",
+          error: error.message || "We couldn't load the admin dashboard. Please try again.",
+        });
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const metrics = dashboard?.metrics;
+  const metricCards = [
+    { id: "students", label: "Total students", value: metrics?.totalStudents ?? "—", detail: "Registered student accounts", icon: "students" },
+    { id: "verified", label: "Verified students", value: metrics?.verifiedStudents ?? "—", detail: "Email-verified accounts", icon: "students" },
+    { id: "active", label: "Active students", value: metrics?.activeStudents ?? "—", detail: `${metrics?.disabledStudents ?? "—"} disabled`, icon: "activity" },
+    { id: "documents", label: "Documents", value: metrics?.totalDocuments ?? "—", detail: `${formatBytes(metrics?.totalStorageBytes)} stored`, icon: "documents" },
+  ];
   return (
     <div className="content-wrap admin-dashboard" aria-labelledby="admin-dashboard-title">
       <header className="admin-page-heading">
         <div>
-          <p className="admin-kicker">ADMIN AREA · FRONTEND PROTOTYPE</p>
+          <p className="admin-kicker">ADMIN AREA</p>
           <h1 id="admin-dashboard-title">Admin overview</h1>
-          <p className="admin-page-description">A starting point for the tools that support the Student Vault community.</p>
+          <p className="admin-page-description">Tools that support the Vaultori community.</p>
         </div>
-        <span className="admin-sample-badge">Illustrative data</span>
       </header>
 
-      <aside className="admin-prototype-notice" aria-label="Prototype limitation">
-        <span className="admin-notice-mark" aria-hidden="true">i</span>
-        <p><strong>Prototype preview.</strong> Every figure below is fictional sample data. This interface does not access live student records or provide administrative authorization.</p>
-      </aside>
-
-      <section className="admin-metrics" aria-label="Illustrative overview figures">
-        {metrics.map((metric) => <MetricCard key={metric.id} metric={metric} />)}
+      <section className="admin-metrics" aria-label="Overview figures">
+        {metricCards.map((metric) => <MetricCard key={metric.id} metric={metric} />)}
       </section>
 
       <div className="admin-dashboard-grid">
-        <ActivityChart entries={activity} />
+        {request.status === "error"
+          ? <section className="admin-panel admin-data-state" role="alert"><p>{request.error}</p></section>
+          : <RecentRegistrations entries={dashboard?.recentRegistrations ?? []} />}
         <section className="admin-panel admin-next-steps" aria-labelledby="admin-workspace-title">
           <div className="admin-panel-heading">
             <div><p className="admin-kicker">ADMIN WORKSPACE</p><h2 id="admin-workspace-title">Explore an area</h2></div>
@@ -91,7 +131,6 @@ export default function AdminDashboardPage() {
               </a>
             ))}
           </nav>
-          <p className="admin-coming-note"><FileText size={15} aria-hidden="true" /> These destinations are separate prototype screens.</p>
         </section>
       </div>
     </div>

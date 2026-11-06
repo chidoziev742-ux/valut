@@ -11,6 +11,7 @@
 .profile-secondary-button, .profile-primary-button { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 15px; border: 1px solid transparent; border-radius: 9px; font: inherit; font-size: 13px; font-weight: 600; text-decoration: none; cursor: pointer; transition: background-color .16s ease, border-color .16s ease, transform .16s ease; }
 .profile-secondary-button { border-color: #d8ded6; color: #294538; background: #fffefa; }
 .profile-secondary-button:hover { border-color: #b8cbbd; background: #f2f6f0; }
+.profile-secondary-button:disabled, .profile-primary-button:disabled { cursor: wait; opacity: .7; }
 .profile-primary-button { border-color: #245344; color: #fff; background: #245344; }
 .profile-primary-button:hover { border-color: #2f6a55; background: #2f6a55; }
 .profile-secondary-button:active, .profile-primary-button:active { transform: translateY(1px); }
@@ -55,6 +56,32 @@
 .password-visibility-button { position: absolute; right: 4px; width: 36px; height: 36px; display: grid; place-items: center; border: 0; border-radius: 7px; color: #536259; background: transparent; cursor: pointer; }
 .password-visibility-button:hover { color: #245344; background: #edf4ee; }
 .storage-stat-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.storage-overview { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(180px, 1fr); gap: 12px; }
+.storage-used-card, .storage-count-card { min-width: 0; display: flex; flex-direction: column; justify-content: center; padding: 18px; border: 1px solid #dce6dc; border-radius: 12px; background: linear-gradient(120deg, #f1f6f0, #fbfaf5); }
+.storage-used-label { color: #53665b; font-size: 12px; font-weight: 600; }
+.storage-used-card > strong { margin-top: 5px; color: #173b32; font-size: clamp(28px, 4vw, 38px); line-height: 1.15; letter-spacing: -.04em; }
+.storage-quota { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; color: #69766e; font-size: 12px; }
+.storage-quota b { color: #a64e3f; font-weight: 600; }
+.storage-count-card { flex-direction: row; align-items: center; justify-content: flex-start; gap: 12px; color: #245344; background: #fffefa; }
+.storage-count-card > span { display: grid; gap: 2px; }
+.storage-count-card strong { color: #20352a; font-size: 24px; line-height: 1.2; }
+.storage-count-card small { color: #69766e; font-size: 12px; }
+.storage-breakdown { display: grid; gap: 13px; margin-top: 20px; }
+.storage-breakdown-heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 5px 12px; }
+.storage-breakdown-heading h3 { margin: 0; color: #26372e; font-size: 14px; }
+.storage-breakdown-heading > span { color: #69766e; font-size: 11px; }
+.storage-category-row { display: grid; gap: 7px; }
+.storage-category-meta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 3px 12px; color: #536259; font-size: 12px; }
+.storage-category-meta strong { color: #26372e; font-weight: 600; }
+.storage-category-track { height: 8px; overflow: hidden; border-radius: 999px; background: #edf0e9; }
+.storage-category-fill { display: block; height: 100%; min-width: 2px; border-radius: inherit; background: #245344; }
+.storage-category-tone-1 { background: #da765d; }
+.storage-category-tone-2 { background: #bc9a50; }
+.storage-category-tone-3 { background: #769887; }
+.storage-state { margin: 0; padding: 15px; border: 1px dashed #cbd8ce; border-radius: 10px; color: #53665b; background: #fbfaf5; font-size: 13px; }
+.storage-state-error { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; border-style: solid; color: #8d3932; background: #fdf2ef; }
+.storage-empty-state { display: grid; justify-items: start; gap: 3px; margin-top: 14px; padding: 15px; border-radius: 10px; background: #fbfaf5; }
+.storage-empty-state p { margin: 0; color: #69766e; font-size: 13px; }
 .settings-page { padding-bottom: 45px; }
 .profile-settings-entry { min-width: 0; display: grid; grid-template-columns: 42px minmax(0, 1fr) auto; align-items: center; gap: 14px; margin-top: 16px; padding: 17px 20px; border: 1px solid #dce6dc; border-radius: 12px; background: #f1f6f0; }
 .profile-settings-entry-icon { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 10px; color: #245344; background: #e1ede3; }
@@ -116,6 +143,9 @@
   .security-action-row { align-items: stretch; flex-direction: column; }
   .security-action-row .profile-secondary-button { width: 100%; }
   .account-summary, .storage-stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .storage-overview { grid-template-columns: 1fr; }
+  .storage-used-card, .storage-count-card { padding: 15px; }
+  .storage-category-meta { display: grid; }
   .password-flow-actions { flex-direction: column-reverse; }
   .password-flow-actions button { width: 100%; }
 }

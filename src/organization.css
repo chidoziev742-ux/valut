@@ -4,6 +4,11 @@
 .organization-heading > div > p:last-child { margin: 0; color: #53625a; font-size: 15px; line-height: 1.5; }
 .organization-eyebrow { margin: 0 0 7px; color: #65766c; font-size: 11px; font-weight: 650; letter-spacing: .09em; }
 .organization-sample-note { margin: 0 7px 19px; color: #5c6d63; font-size: 12px; line-height: 1.5; }
+.organization-data-state { display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 120px; margin: 12px 0; padding: 20px; border: 1px solid #e7e8e1; border-radius: 12px; color: #53625a; background: #fffefa; text-align: center; }
+.organization-data-error { flex-direction: column; border-color: #e5c9c3; color: #913d34; }
+.organization-data-error p { margin: 0; }
+.organization-inline-error { flex-basis: 100%; color: #9b3e34; font-size: 11px; }
+.organization-button:disabled { opacity: .7; cursor: wait; }
 .organization-button { min-height: 42px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 14px; border: 1px solid transparent; border-radius: 9px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background .15s ease, border-color .15s ease, transform .15s ease; }
 .organization-button:focus-visible, .organization-folder-open:focus-visible, .organization-folder-actions button:focus-visible, .organization-back:focus-visible, .organization-text-link:focus-visible, .organization-icon-action:focus-visible { outline: 2px solid #245344; outline-offset: 2px; }
 .organization-button:active, .organization-icon-action:active { transform: scale(.98); }
@@ -71,6 +76,7 @@
 .organization-category-summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 15px; padding: 17px 19px; }
 .organization-category-summary .organization-eyebrow { margin-bottom: 5px; }
 .organization-empty { display: grid; justify-items: center; gap: 8px; padding: 36px 18px; color: #657269; text-align: center; }
+.organization-folder-grid > .organization-empty { grid-column: 1 / -1; }
 .organization-empty h2, .organization-empty h3 { margin: 1px 0 0; color: #20372b; font-size: 17px; }
 .organization-empty p { max-width: 420px; margin: 0 0 5px; font-size: 12px; line-height: 1.55; }
 .organization-empty-icon { width: 46px; height: 46px; display: grid; place-items: center; border-radius: 13px; color: #245344; background: #e5efe9; }

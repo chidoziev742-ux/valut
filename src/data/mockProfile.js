@@ -21,8 +21,8 @@ export const studentProfileFields = [
   { name: "faculty", label: "Faculty" },
   { name: "department", label: "Department" },
   { name: "program", label: "Course or programme", autoComplete: "organization-title" },
-  { name: "studyYear", label: "Academic level", placeholder: "e.g. Year 3 or 300 level" },
-  { name: "academicSession", label: "Academic session", placeholder: "e.g. 2025/2026" },
+  { name: "studyYear", label: "Academic level", placeholder: "e.g. Year 3 or 300 level", maxLength: 40 },
+  { name: "academicSession", label: "Academic session", placeholder: "e.g. 2025/2026", maxLength: 40 },
 ];
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -32,7 +32,8 @@ export function validateStudentProfile(values) {
   const errors = {};
   for (const field of profileFields) {
     const value = String(values[field] ?? "").trim();
-    if (value.length > 120) errors[field] = "Use 120 characters or fewer.";
+    const maxLength = field === "studyYear" || field === "academicSession" ? 40 : 120;
+    if (value.length > maxLength) errors[field] = `Use ${maxLength} characters or fewer.`;
   }
   if (!String(values.fullName ?? "").trim()) errors.fullName = "Enter your full name.";
   if (values.email && !emailPattern.test(String(values.email).trim())) errors.email = "Enter a valid email address.";

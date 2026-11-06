@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { CalendarDays, File, FileImage, FileText, FileType2, FolderOpen, Search } from "lucide-react";
+import { File, FileImage, FileText, FileType2, FolderOpen, Search } from "lucide-react";
 import { documentCategories, filterAndSortDocuments } from "../data/mockDocuments.js";
 import "../styles/documents.css";
 
@@ -28,8 +28,8 @@ function DocumentArtwork({ document, size = "card" }) {
   const fallbackText = failed
     ? "Image preview could not be loaded"
     : imageType
-      ? document.attachment ? "Image preview unavailable in this browser" : "Sample record · no file attached"
-      : document.attachment ? `${document.fileType} · in-app preview unavailable` : "Sample record · no file attached";
+      ? document.attachment || document.storageBacked ? "Open details to preview this image" : "No file attached"
+      : document.attachment || document.storageBacked ? `${document.fileType} · open details to preview` : "No file attached";
 
   return (
     <div className={`document-artwork document-artwork-${size}`}>
@@ -82,7 +82,7 @@ function LibraryCard({ document }) {
   );
 }
 
-export default function DocumentLibraryPage({ documents, onUpload }) {
+export default function DocumentLibraryPage({ documents, onUpload, onScan, loading = false, error = "", onRetry }) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("all");
   const [fileType, setFileType] = useState("all");
@@ -107,7 +107,10 @@ export default function DocumentLibraryPage({ documents, onUpload }) {
           <h1 id="library-title">Document Library</h1>
           <p>Find and review your university documents in one place.</p>
         </div>
-        <div className="library-heading-actions"><span className="library-sample-badge">Prototype data · session-only changes</span><button type="button" className="button-primary library-upload-button" onClick={onUpload}>Add document</button></div>
+        <div className="library-heading-actions">
+          {/* Scanning is deferred; keep the callback for future use without exposing the action. */}
+          <button type="button" className="button-primary library-upload-button" onClick={onUpload}>Add document</button>
+        </div>
       </section>
 
       <div className="library-view-switch" role="group" aria-label="Choose active or archived documents">
@@ -136,25 +139,26 @@ export default function DocumentLibraryPage({ documents, onUpload }) {
           </FilterSelect>
         </div>
         <div className="library-results-line">
-          <p role="status" aria-live="polite"><strong>{filteredDocuments.length}</strong> of {countInView} {view} sample documents</p>
+          <p role="status" aria-live="polite"><strong>{filteredDocuments.length}</strong> of {countInView} {view} documents</p>
           <button type="button" className="library-clear-button" onClick={clearFilters} disabled={!hasFilters}>Clear filters</button>
         </div>
       </section>
 
-      {filteredDocuments.length ? (
+      {loading && <section className="library-empty panel" role="status"><h2>Loading your documents…</h2></section>}
+      {error && <section className="library-load-error" role="alert"><span>{error}</span><button type="button" className="button-secondary" onClick={onRetry}>Try again</button></section>}
+      {!loading && !error && filteredDocuments.length ? (
         <section className="library-grid" aria-label="Document results">
           {filteredDocuments.map((document) => <LibraryCard key={document.id} document={document} />)}
         </section>
-      ) : (
+      ) : !loading && !error && (
         <section className="library-empty panel" aria-live="polite">
           <span className="library-empty-icon"><FolderOpen size={25} /></span>
           <h2>{countInView === 0 ? (view === "archived" ? "No archived documents" : "Your active library is empty") : "No documents match those filters"}</h2>
-          <p>{countInView === 0 ? (view === "archived" ? "Documents you archive will stay here until you restore them." : "Add a document to begin. Your sample records may have been archived or removed in this session.") : "Try another search or clear the filters to see all documents in this view."}</p>
+          <p>{countInView === 0 ? (view === "archived" ? "Documents you archive will stay here until you restore them." : "Add a document to begin. Your library is empty.") : "Try another search or clear the filters to see all documents in this view."}</p>
           {countInView > 0 && <button type="button" className="button-secondary" onClick={clearFilters}>Clear search and filters</button>}
         </section>
       )}
 
-      <p className="library-prototype-footnote"><CalendarDays size={15} /> Sample records are illustrative only. Selected files remain in this tab's memory; nothing is uploaded or persisted.</p>
     </div>
   );
 }

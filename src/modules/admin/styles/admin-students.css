@@ -47,6 +47,10 @@
 .admin-students-empty > span { width: 42px; height: 42px; display: grid; place-items: center; margin-bottom: 11px; border-radius: 12px; color: #245344; background: #e8f0e8; }
 .admin-students-empty h2, .admin-students-empty h1 { margin: 0 0 5px; color: #23342a; font-size: 17px; }
 .admin-students-empty p { max-width: 390px; margin: 0; color: #657168; font-size: 12px; line-height: 1.55; }
+.admin-student-pagination { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 18px; color: #59675f; font-size: 12px; }
+.admin-student-pagination button, .admin-student-action { border: 1px solid #cbd9cc; border-radius: 8px; padding: 8px 11px; color: #245344; background: #f7faf6; font: inherit; cursor: pointer; }
+.admin-student-pagination button:disabled, .admin-student-action:disabled { cursor: not-allowed; opacity: .55; }
+.admin-student-action { white-space: nowrap; }
 .admin-students-footnote { margin: 11px 4px 0; color: #6a756e; font-size: 10px; line-height: 15px; }
 .admin-back-link { width: fit-content; min-height: 40px; display: inline-flex; align-items: center; gap: 7px; margin: 0 0 17px 3px; padding: 0 9px; border-radius: 7px; color: #245344; font-size: 12px; font-weight: 600; text-decoration: none; }
 .admin-student-detail-heading { align-items: center; }

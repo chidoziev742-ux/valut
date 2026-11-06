@@ -33,6 +33,16 @@
 .admin-chart-label { position: absolute; bottom: -23px; color: #657169; font-size: 11px; }
 .admin-chart-note { margin: 12px 0 0; color: #6a756e; font-size: 11px; line-height: 16px; }
 .admin-chart-empty { padding: 65px 12px; color: #59645d; text-align: center; }
+.admin-registration-list { display: grid; gap: 8px; }
+.admin-registration { min-width: 0; display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid #e8ebe4; border-radius: 10px; }
+.admin-registration-icon { width: 32px; height: 32px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 9px; color: #245344; background: #eaf1e9; }
+.admin-registration-copy { min-width: 0; flex: 1; display: grid; gap: 2px; }
+.admin-registration-copy strong, .admin-registration-copy small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.admin-registration-copy strong { color: #24342b; font-size: 13px; line-height: 18px; }
+.admin-registration-copy small, .admin-registration time { color: #69756e; font-size: 11px; line-height: 15px; }
+.admin-registration time { flex: 0 0 auto; }
+.admin-data-state { display: grid; min-height: 226px; place-items: center; color: #59645d; text-align: center; }
+.admin-data-state p { max-width: 360px; margin: 0; line-height: 1.55; }
 .admin-destination-list { display: grid; gap: 8px; }
 .admin-destination { min-width: 0; min-height: 67px; display: flex; align-items: center; gap: 11px; padding: 10px; border: 1px solid #e8ebe4; border-radius: 10px; color: #202923; background: #fffefa; text-decoration: none; transition: border-color .16s ease, background .16s ease, transform .16s ease; }
 .admin-destination:hover { transform: translateY(-1px); border-color: #b8cbb9; background: #f7f9f4; }

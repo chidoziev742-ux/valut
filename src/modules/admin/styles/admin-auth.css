@@ -6,5 +6,5 @@
 .admin-auth-links { display: grid; justify-items: center; gap: 9px; margin-top: -2px; color: #647068; font-size: 12px; text-align: center; }
 .admin-auth-links > span { color: #647068; }
 .admin-auth-links a { color: #315545; font-weight: 650; text-decoration: none; }
-.admin-auth-links a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.admin-auth-links a:hover { text-decoration: none; }
 .admin-auth-links a:focus-visible { outline: 2px solid #245344; outline-offset: 3px; border-radius: 2px; }

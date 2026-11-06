@@ -3,6 +3,13 @@ import cors from "cors";
 import express from "express";
 import helmet from "helmet";
 import { config } from "./config.js";
+import { createAuthRouter } from "./routes/auth.js";
+import { createStudentRouter } from "./routes/student.js";
+import { createDocumentsRouter } from "./routes/documents.js";
+import { createFoldersRouter } from "./routes/folders.js";
+import { createAcademicRecordsRouter } from "./routes/academic-records.js";
+import { createNotificationsRouter } from "./routes/notifications.js";
+import { createAdminRouter } from "./routes/admin.js";
 
 export function safeErrorHandler(error, req, res, next) {
   if (res.headersSent) {
@@ -39,7 +46,15 @@ export function safeErrorHandler(error, req, res, next) {
   });
 }
 
-export function createApp() {
+export function createApp({
+  authRouter = createAuthRouter(),
+  studentRouter = createStudentRouter(),
+  documentsRouter = createDocumentsRouter(),
+  foldersRouter = createFoldersRouter(),
+  academicRecordsRouter = createAcademicRecordsRouter(),
+  notificationsRouter = createNotificationsRouter(),
+  adminRouter = createAdminRouter(),
+} = {}) {
   const app = express();
 
   app.disable("x-powered-by");
@@ -50,8 +65,9 @@ export function createApp() {
         // Non-browser clients may omit Origin. Browser origins must match the configured frontend exactly.
         callback(null, !origin || origin === config.frontendOrigin);
       },
-      methods: ["GET", "OPTIONS"],
-      allowedHeaders: ["Content-Type"],
+      methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "X-CSRF-Token"],
+      credentials: true,
       optionsSuccessStatus: 204,
     }),
   );
@@ -61,6 +77,14 @@ export function createApp() {
     next();
   });
   app.use(express.json({ limit: config.jsonBodyLimit, strict: true }));
+
+  app.use("/api/auth", authRouter);
+  app.use("/api/admin", adminRouter);
+  app.use("/api/student/documents", documentsRouter);
+  app.use("/api/student/folders", foldersRouter);
+  app.use("/api/student/academic-records", academicRecordsRouter);
+  app.use("/api/student/notifications", notificationsRouter);
+  app.use("/api/student", studentRouter);
 
   app.get("/api/health", (req, res) => {
     res.status(200).json({ status: "ok", service: "student-vault-api" });

@@ -1,16 +1,6 @@
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
-import test from "node:test";Approved. Implement `server/scripts/verify-db-connection.js` using the proposed read-only approach.
-
-Before implementation:
-1. Confirm whether `query()` already invokes `readDatabaseUrl()` validation. Reuse the existing validation path; avoid redundant configuration logic.
-2. Load `server/.env` without printing its contents.
-3. Query only `current_database()`, `current_user`, and `version()`.
-4. Print only those three result fields. Never log `DATABASE_URL`, passwords, or raw connection errors.
-5. Always close the pool, including on failure.
-6. Do not apply migrations or modify database data.
-
-After creating the script, run the connection check only. Report the database name, role, PostgreSQL version, and success/failure. Do not print connection details or credentials.
+import test from "node:test";
 import express from "express";
 
 const allowedOrigin = "http://localhost:5173";

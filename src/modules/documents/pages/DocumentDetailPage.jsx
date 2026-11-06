@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import {
   ArrowLeft, Archive, CalendarDays, Download, File, FileImage, FileText,
-  FileType2, Folder, Pencil, RotateCcw, Share2, Trash2,
+  FileType2, Folder, Pencil, RotateCcw, Trash2,
 } from "lucide-react";
 import { canDownloadDocument, documentCategories } from "../data/mockDocuments.js";
+import { downloadDocumentFile, getDocumentDownloadFilename } from "../downloadDocument.js";
 import { DeleteDialog, RenameDialog } from "../components/DocumentOperationDialogs.jsx";
 import "../styles/documents.css";
 
@@ -41,15 +42,16 @@ function getReturnLocation(folders) {
   return { href: "/folders", label: "Folders", crumb: [{ label: "Folders", href: "/folders" }] };
 }
 
-function PreviewFallback({ document, failed = false }) {
+function PreviewFallback({ document, failed = false, previewError = "" }) {
   const Icon = iconFor(document.fileType);
-  let message = "This file type cannot be previewed in Student Vault yet.";
-  if (!document.attachment) message = "Sample record only. No actual file is attached, so a preview is unavailable.";
+  let message = "A preview isn't available for this file type.";
+  if (previewError) message = previewError;
+  else if (!document.attachment && !document.storageBacked) message = "No file is attached, so a preview is unavailable.";
   else if (failed) message = document.fileType === "PDF"
     ? "This browser could not display the PDF preview. You can download the selected file."
     : "The selected file preview could not be loaded.";
-  else if (["DOC", "DOCX"].includes(document.fileType)) message = "Word document previews are not available yet. The selected file remains in this browser session.";
-  else if (["JPG", "JPEG", "PNG"].includes(document.fileType)) message = "Image preview is unavailable. The selected file remains in this browser session.";
+  else if (["DOC", "DOCX"].includes(document.fileType)) message = "Download the document to view it.";
+  else if (["JPG", "JPEG", "PNG"].includes(document.fileType)) message = "Image preview isn't available. You can download the selected file.";
   return (
     <div className="detail-preview-fallback" role="status">
       <span className="detail-preview-icon"><Icon size={32} aria-hidden="true" /></span>
@@ -59,21 +61,23 @@ function PreviewFallback({ document, failed = false }) {
   );
 }
 
-function DocumentPreview({ document }) {
+function DocumentPreview({ document, previewUrl, previewError }) {
   const [failed, setFailed] = useState(false);
   const type = String(document.fileType ?? "").toUpperCase();
   const isImage = ["JPG", "JPEG", "PNG"].includes(type);
   const isPdf = type === "PDF";
-  useEffect(() => setFailed(false), [document.id, document.previewUrl]);
+  useEffect(() => setFailed(false), [document.id, previewUrl]);
 
-  if (!document.attachment || !document.previewUrl || failed) return <PreviewFallback document={document} failed={failed} />;
+  if ((!document.attachment && !document.storageBacked) || !previewUrl || failed || previewError) {
+    return <PreviewFallback document={document} failed={failed} previewError={previewError} />;
+  }
   if (isImage) {
-    return <div className="detail-preview-image-wrap"><img className="detail-preview-image" src={document.previewUrl} alt={`Preview of ${document.name}`} onError={() => setFailed(true)} /></div>;
+    return <div className="detail-preview-image-wrap"><img className="detail-preview-image" src={previewUrl} alt={`Preview of ${document.name}`} onError={() => setFailed(true)} /></div>;
   }
   if (isPdf) {
     return (
       <div className="detail-pdf-wrap">
-        <iframe className="detail-pdf-frame" src={document.previewUrl} title={`PDF preview of ${document.name}`} onError={() => setFailed(true)} />
+        <iframe className="detail-pdf-frame" src={previewUrl} title={`PDF preview of ${document.name}`} onError={() => setFailed(true)} />
         <p>PDF display uses your browser’s built-in viewer. If the page is blank, use Download selected file.</p>
       </div>
     );
@@ -81,20 +85,63 @@ function DocumentPreview({ document }) {
   return <PreviewFallback document={document} />;
 }
 
-export default function DocumentDetailPage({ document, documentId, folders, onNavigate, onRename, onCategory, onMove, onArchive, onRestore, onDelete, onNotice }) {
+export default function DocumentDetailPage({
+  document,
+  documentId,
+  folders,
+  onNavigate,
+  onRename,
+  onCategory,
+  onMove,
+  onArchive,
+  onRestore,
+  onDelete,
+  onGetDownloadUrl,
+  onNotice,
+  foldersLoading = false,
+  foldersError = "",
+  onRetryFolders,
+  loading = false,
+  loadError = "",
+  onRetry,
+}) {
   const [operation, setOperation] = useState(null);
+  const [operationError, setOperationError] = useState("");
+  const [previewUrl, setPreviewUrl] = useState("");
+  const [previewError, setPreviewError] = useState("");
   const returnLocation = getReturnLocation(folders);
   const attached = canDownloadDocument(document);
   const Icon = iconFor(document?.fileType);
 
+  useEffect(() => {
+    let active = true;
+    setPreviewUrl("");
+    setPreviewError("");
+    if (!document?.id || !document.storageBacked) return () => { active = false; };
+    onGetDownloadUrl(document.id)
+      .then((url) => {
+        if (active) setPreviewUrl(url);
+      })
+      .catch((error) => {
+        if (active) setPreviewError(error.message || "A secure preview link is unavailable.");
+      });
+    return () => {
+      active = false;
+    };
+  }, [document?.id, document?.storageBacked, onGetDownloadUrl]);
+
   if (!document) {
+    if (loading) {
+      return <div className="content-wrap detail-content"><section className="detail-missing panel" role="status"><h1>Loading document…</h1></section></div>;
+    }
     return (
       <div className="content-wrap detail-content">
         <section className="detail-missing panel" role="status">
           <span className="detail-preview-icon"><File size={30} aria-hidden="true" /></span>
           <p className="library-eyebrow">DOCUMENT UNAVAILABLE</p>
           <h1>We couldn’t find that document</h1>
-          <p>The document may have been removed from this prototype session, or this link may be invalid. No other document was opened.</p>
+          <p>{loadError || "The document may have been removed, or this link may be invalid. No other document was opened."}</p>
+          {loadError && <button className="button-secondary" type="button" onClick={onRetry}>Try again</button>}
           <a className="button-primary detail-back-button" href={returnLocation.href}><ArrowLeft size={16} /> Back to {returnLocation.label}</a>
           <small>Document reference: {documentId || "invalid"}</small>
         </section>
@@ -102,28 +149,63 @@ export default function DocumentDetailPage({ document, documentId, folders, onNa
     );
   }
 
-  const download = () => {
-    if (!document.attachment) return;
-    const url = window.URL.createObjectURL(document.attachment);
-    const link = window.document.createElement("a");
-    link.href = url;
-    link.download = `${document.name.replace(/[\\/]/g, "-")}${document.fileExtension ?? ""}`;
-    link.style.display = "none";
-    window.document.body.appendChild(link);
-    link.click();
-    link.remove();
-    window.setTimeout(() => window.URL.revokeObjectURL(url), 60_000);
-    onNotice("Download started from the selected local file. No cloud copy exists.");
+  const download = async () => {
+    if (!attached) return;
+    try {
+      const url = await onGetDownloadUrl(document.id);
+      await downloadDocumentFile(url, getDocumentDownloadFilename(document));
+      onNotice("Document downloaded.");
+    } catch (error) {
+      setOperationError(error.message || "The document could not be downloaded.");
+    }
   };
 
-  const saveName = (id, name) => { onRename(id, name); setOperation(null); onNotice("Document name updated for this session."); };
-  const confirmDelete = (id) => { onDelete(id); setOperation(null); onNotice("Document record removed from this session."); onNavigate(returnLocation.href); };
-  const moveDocument = (folderId) => { onMove(document.id, folderId); onNotice("Document moved for this session."); };
-  const toggleArchive = () => {
-    if (document.archived) { onRestore(document.id); onNotice("Document restored to the active library."); }
-    else { onArchive(document.id); onNotice("Document archived in this session."); }
+  const saveName = async (id, name) => {
+    try {
+      await onRename(id, name);
+      setOperation(null);
+      setOperationError("");
+      onNotice("Document name updated.");
+    } catch (error) {
+      setOperationError(error.message || "The document name could not be updated.");
+    }
   };
-  const categoryChange = (category) => { onCategory(document.id, category); onNotice("Document category updated for this session."); };
+  const confirmDelete = async (id) => {
+    try {
+      await onDelete(id);
+      setOperation(null);
+      onNavigate(returnLocation.href);
+    } catch (error) {
+      setOperationError(error.message || "The document could not be deleted.");
+    }
+  };
+  const moveDocument = async (folderId) => {
+    try {
+      await onMove(document.id, folderId);
+      setOperationError("");
+      onNotice("Document moved.");
+    } catch (error) {
+      setOperationError(error.message || "The document could not be moved.");
+    }
+  };
+  const toggleArchive = async () => {
+    try {
+      if (document.archived) { await onRestore(document.id); onNotice("Document restored to the active library."); }
+      else { await onArchive(document.id); onNotice("Document archived."); }
+      setOperationError("");
+    } catch (error) {
+      setOperationError(error.message || "The document could not be updated.");
+    }
+  };
+  const categoryChange = async (category) => {
+    try {
+      await onCategory(document.id, category);
+      onNotice("Document category updated.");
+      setOperationError("");
+    } catch (error) {
+      setOperationError(error.message || "The document category could not be updated.");
+    }
+  };
   const currentFolder = folders.find((folder) => folder.id === document.folderId) ?? null;
 
   return (
@@ -138,13 +220,12 @@ export default function DocumentDetailPage({ document, documentId, folders, onNa
       </div>
       <header className="detail-title-row">
         <span className="detail-title-icon"><Icon size={25} aria-hidden="true" /></span>
-        <div><p className="library-eyebrow">DOCUMENT DETAILS · PROTOTYPE</p><h1>{document.name}</h1><p>{document.description}</p></div>
+        <div><p className="library-eyebrow">DOCUMENT DETAILS</p><h1>{document.name}</h1><p>{document.description}</p></div>
       </header>
       <div className="detail-page-grid">
         <section className="detail-preview-panel panel" aria-label="Document preview">
-          <div className="detail-section-heading"><div><p className="library-eyebrow">PREVIEW</p><h2>{document.fileType} file</h2></div><span className="detail-preview-session">Session only</span></div>
-          <div className="detail-preview-area"><DocumentPreview document={document} /></div>
-          {document.attachment && <p className="detail-preview-footnote">The selected local file is held in this browser tab only; it is not uploaded or persisted.</p>}
+          <div className="detail-section-heading"><div><p className="library-eyebrow">PREVIEW</p><h2>{document.fileType} file</h2></div></div>
+          <div className="detail-preview-area"><DocumentPreview document={document} previewUrl={previewUrl} previewError={previewError} /></div>
         </section>
         <aside className="detail-side-column">
           <section className="detail-metadata-panel panel" aria-labelledby="metadata-heading">
@@ -157,19 +238,23 @@ export default function DocumentDetailPage({ document, documentId, folders, onNa
               <div><dt>File size</dt><dd>{document.fileSize || "Not available"}</dd></div>
               <div><dt>Folder</dt><dd><Folder size={14} aria-hidden="true" /> {currentFolder?.name ?? "Unfiled"}</dd></div>
             </dl>
-            {!attached && <p className="detail-sample-note">Sample record · no actual file is attached. Preview and download are unavailable.</p>}
+            {!attached && <p className="detail-sample-note">No file is attached. Preview and download are unavailable.</p>}
           </section>
           <section className="detail-actions-panel panel" aria-labelledby="actions-heading">
             <div className="detail-section-heading"><div><p className="library-eyebrow">ORGANIZE</p><h2 id="actions-heading">Actions</h2></div></div>
             <button className="detail-action-button" type="button" onClick={() => setOperation("rename")}><Pencil size={16} /> Rename</button>
-            <button className="detail-action-button detail-share-unavailable" type="button" aria-disabled="true" onClick={() => onNotice("Document sharing is planned for a future version.")}><Share2 size={16} /> <span>Share</span><span className="detail-unavailable-badge">Unavailable at the moment</span></button>
             <label className="detail-action-label" htmlFor="detail-folder">Move to folder</label>
-            <select className="detail-action-select" id="detail-folder" value={document.folderId ?? ""} onChange={(event) => moveDocument(event.target.value || null)}><option value="">Unfiled</option>{folders.map((folder) => <option key={folder.id} value={folder.id}>{folder.name}</option>)}</select>
+            <select className="detail-action-select" id="detail-folder" value={document.folderId ?? ""} onChange={(event) => moveDocument(event.target.value || null)} disabled={foldersLoading || Boolean(foldersError)}>
+              <option value="">Unfiled</option>
+              {folders.map((folder) => <option key={folder.id} value={folder.id}>{folder.name}</option>)}
+            </select>
+            {foldersLoading && <small role="status">Loading folders…</small>}
+            {foldersError && <div className="operation-error" role="alert"><p>{foldersError}</p><button className="detail-action-button" type="button" onClick={onRetryFolders}>Retry folder loading</button></div>}
             <button className="detail-action-button" type="button" disabled={!attached} onClick={download}><Download size={16} /> {attached ? "Download selected file" : "Download unavailable"}</button>
             <button className="detail-action-button" type="button" onClick={toggleArchive}>{document.archived ? <RotateCcw size={16} /> : <Archive size={16} />}{document.archived ? "Restore document" : "Archive document"}</button>
             <button className="detail-action-button detail-delete-action" type="button" onClick={() => setOperation("delete")}><Trash2 size={16} /> Delete record…</button>
-            <p className="detail-action-note">Actions update this prototype’s in-memory state only.</p>
           </section>
+          {operationError && <p className="operation-error" role="alert">{operationError}</p>}
         </aside>
       </div>
       {operation === "rename" && <RenameDialog document={document} onClose={() => setOperation(null)} onSave={saveName} />}
