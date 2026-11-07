@@ -10,7 +10,6 @@ import DocumentLibraryPage from "./modules/documents/pages/DocumentLibraryPage.j
 import DocumentDetailPage from "./modules/documents/pages/DocumentDetailPage.jsx";
 import FoldersPage from "./modules/documents/pages/FoldersPage.jsx";
 import UploadDialog from "./modules/documents/components/UploadDialog.jsx";
-import DocumentScannerPage from "./modules/documents/scanner/DocumentScannerPage.jsx";
 import { normalizeDocumentPreviewUrl } from "./modules/documents/previewUrl.js";
 import AcademicRecordsPage from "./modules/academic-records/pages/AcademicRecordsPage.jsx";
 import DashboardPage from "./modules/dashboard/pages/DashboardPage.jsx";
@@ -1157,16 +1156,10 @@ export default function App() {
               ? <DocumentLibraryPage
                 documents={documents}
                 onUpload={() => setDialog(true)}
-                onScan={() => navigateTo("/scanner")}
                 loading={documentRequest.status === "loading" || documentRequest.status === "idle"}
                 error={documentRequest.error}
                 onRetry={retryDocumentsLoad}
               />
-              : route?.path === "/scanner"
-                ? <DocumentScannerPage
-                  onBack={() => navigateTo("/documents")}
-                  onUpload={(formData, onProgress) => uploadDocument(formData, onProgress, { quiet: true })}
-                />
             : <PlaceholderPage route={route} />}
         </AppShell>
       )}

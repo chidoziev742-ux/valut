@@ -29,7 +29,6 @@ export const routeTable = [
   { path: "/profile/setup", title: "Student profile setup", kind: "student" },
   { path: "/admin/login", title: "Admin sign in", kind: "admin-auth" },
   { path: "/documents", title: "My Documents", kind: "student" },
-  { path: "/scanner", title: "Document scanner", kind: "student" },
   { path: "/academic-records", title: "Academic Records", kind: "student" },
   { path: "/upload", title: "Upload", kind: "student" },
   { path: "/folders", title: "Folders", kind: "student" },
