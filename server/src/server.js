@@ -1,10 +1,11 @@
 import { createApp } from "./app.js";
-import { config } from "./config.js";
 import { closePool } from "./db/pool.js";
 
 const app = createApp();
-const server = app.listen(config.port, config.host, () => {
-  console.log(`Student Vault API listening at http://${config.host}:${config.port}`);
+const port = process.env.PORT || 4000;
+const host = "0.0.0.0";
+const server = app.listen(port, host, () => {
+  console.log(`Student Vault API listening at http://${host}:${port}`);
 });
 
 function shutdown(signal) {
