@@ -1,10 +1,10 @@
-.admin-students-page { max-width: 1320px; padding-top: 27px; }
+.admin-students-page { width: 100%; max-width: 1320px; min-width: 0; padding-top: 27px; }
 .admin-students-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; margin: 0 4px 18px; }
 .admin-students-heading h1 { margin: 0 0 7px; color: #16231e; font-size: clamp(27px, 3vw, 33px); line-height: 1.2; letter-spacing: -.65px; }
 .admin-students-heading > div > p:last-child { margin: 0; color: #526159; font-size: 14px; line-height: 1.55; }
 .admin-students-prototype { display: flex; align-items: flex-start; gap: 6px; margin: 0 4px 17px; padding: 12px 14px; border: 1px solid #eadbb9; border-radius: 10px; color: #594825; background: #fbf5e8; font-size: 12px; line-height: 1.55; }
 .admin-students-prototype strong { color: #453719; }
-.admin-students-panel, .admin-student-detail-panel { min-width: 0; border: 1px solid #e7e9e1; border-radius: 14px; background: #fffefa; box-shadow: 0 1px 2px rgb(23 59 50 / 4%); }
+.admin-students-panel, .admin-student-detail-panel { width: 100%; max-width: 100%; min-width: 0; border: 1px solid #e7e9e1; border-radius: 14px; background: #fffefa; box-shadow: 0 1px 2px rgb(23 59 50 / 4%); }
 .admin-students-list-heading { min-height: 74px; display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 15px 19px; }
 .admin-students-list-heading h2 { margin: 0 0 3px; color: #1c2a22; font-size: 17px; line-height: 23px; }
 .admin-students-list-heading p { margin: 0; color: #66736a; font-size: 11px; }
@@ -22,8 +22,8 @@
 .admin-student-clear { min-height: 43px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 0 11px; border: 1px solid #d9dfd7; border-radius: 9px; color: #365447; background: #fffefa; font: inherit; font-size: 11px; font-weight: 600; cursor: pointer; }
 .admin-student-clear:hover:not(:disabled) { border-color: #b9cbbd; background: #f1f6ef; }
 .admin-student-clear:disabled { color: #78837c; background: #f5f4ef; cursor: not-allowed; }
-.admin-student-table-wrap { overflow-x: auto; }
-.admin-student-table { width: 100%; border-collapse: collapse; text-align: left; }
+.admin-student-table-wrap { width: 100%; max-width: 100%; min-width: 0; overflow-x: auto; }
+.admin-student-table { width: 100%; min-width: 860px; border-collapse: collapse; text-align: left; }
 .admin-student-table thead { background: #faf9f4; }
 .admin-student-table th, .admin-student-table td { padding: 12px 10px; border-bottom: 1px solid #eceee8; color: #4f5d54; font-size: 11px; line-height: 16px; vertical-align: middle; }
 .admin-student-table th:first-child, .admin-student-table td:first-child { padding-left: 19px; }
