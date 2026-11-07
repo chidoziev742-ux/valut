@@ -1,4 +1,4 @@
-.admin-app-shell { min-height: 100vh; color: var(--color-ink); background: var(--color-cream-50); }
+.admin-app-shell { width: 100%; max-width: 100%; min-height: 100vh; color: var(--color-ink); background: var(--color-cream-50); }
 .admin-sidebar { width: 248px; position: fixed; inset: 0 auto 0 0; z-index: 10; display: flex; flex-direction: column; padding: 26px 15px 18px; color: #f4f8f4; background: linear-gradient(160deg, #103b31, #082f28 76%, #092a24); }
 .admin-shell-brand { min-height: 52px; display: flex; align-items: center; gap: 11px; padding: 2px 7px; color: inherit; text-decoration: none; }
 .admin-shell-brand:focus-visible { outline: 2px solid #f4c54e; outline-offset: 3px; border-radius: 8px; }
@@ -43,7 +43,7 @@
 @media (max-width: 980px) { .admin-sidebar { width: 218px; }.admin-main-column { margin-left: 218px; }.admin-topbar { padding: 0 24px; }.admin-shell-context { padding-right: 24px; padding-left: 24px; }.admin-shell-footer { padding-right: 24px; padding-left: 24px; } }
 @media (max-width: 680px) {
   .admin-sidebar { display: none; }
-  .admin-main-column { margin-left: 0; padding-bottom: 16px; }
+  .admin-main-column { width: 100%; max-width: 100%; margin-left: 0; padding-bottom: 16px; }
   .admin-topbar { min-height: 62px; justify-content: space-between; gap: 12px; padding: 0 16px; }
   .admin-topbar-brand { min-width: 0; display: block; }
   .admin-topbar-brand .admin-shell-brand { gap: 8px; padding: 0; }
