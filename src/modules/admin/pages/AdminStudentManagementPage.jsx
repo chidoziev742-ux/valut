@@ -26,6 +26,10 @@ function StudentStatus({ status, verified }) {
   return <span className={`admin-student-status status-${status}`}><span aria-hidden="true" />{status}{verified ? " · verified" : " · unverified"}</span>;
 }
 
+function studentDetailHref(studentId, returnUrl) {
+  return `/admin/students/${encodeURIComponent(studentId)}?${returnUrl.split("?")[1] ?? ""}`;
+}
+
 function StudentFilters({ search, status, verification, onSearch, onStatus, onVerification, onClear, hasFilters }) {
   return (
     <section className="admin-student-filters" aria-label="Search and filter student records">
@@ -45,10 +49,34 @@ function StudentList({ students, returnUrl, loading }) {
       <th scope="row"><span className="admin-student-name">{student.name}</span><span className="admin-student-email">{student.email}</span></th>
       <td>{student.university || "Not provided"}</td><td>{student.programme || "Not provided"}</td><td>{student.academicLevel || "Not provided"}</td>
       <td><StudentStatus status={student.status} verified={student.emailVerified} /></td><td><time dateTime={student.joined}>{formatDate(student.joined)}</time></td>
-      <td><a className="admin-student-view" href={`/admin/students/${encodeURIComponent(student.id)}?${returnUrl.split("?")[1] ?? ""}`}>View <ArrowRight size={15} aria-hidden="true" /></a></td>
+      <td><a className="admin-student-view" href={studentDetailHref(student.id, returnUrl)}>View <ArrowRight size={15} aria-hidden="true" /></a></td>
     </tr>
   );
-  return <div className="admin-student-table-wrap"><table className="admin-student-table"><caption className="sr-only">Student directory</caption><thead><tr><th>Student</th><th>University</th><th>Programme</th><th>Level</th><th>Status</th><th>Joined</th><th><span className="sr-only">Details</span></th></tr></thead><tbody>{students.map(row)}</tbody></table></div>;
+  return (
+    <>
+      <div className="admin-student-table-wrap"><table className="admin-student-table"><caption className="sr-only">Student directory</caption><thead><tr><th>Student</th><th>University</th><th>Programme</th><th>Level</th><th>Status</th><th>Joined</th><th><span className="sr-only">Details</span></th></tr></thead><tbody>{students.map(row)}</tbody></table></div>
+      <div className="admin-student-cards" aria-label="Student directory">
+        {students.map((student) => (
+          <article className="admin-student-card" key={student.id}>
+            <div className="admin-student-card-heading">
+              <div>
+                <h2>{student.name}</h2>
+                <span className="admin-student-card-email">{student.email}</span>
+              </div>
+              <StudentStatus status={student.status} verified={student.emailVerified} />
+            </div>
+            <dl>
+              <div><dt>University</dt><dd>{student.university || "Not provided"}</dd></div>
+              <div><dt>Programme</dt><dd>{student.programme || "Not provided"}</dd></div>
+              <div><dt>Academic level</dt><dd>{student.academicLevel || "Not provided"}</dd></div>
+              <div><dt>Registered</dt><dd><time dateTime={student.joined}>{formatDate(student.joined)}</time></dd></div>
+            </dl>
+            <a className="admin-student-card-link" href={studentDetailHref(student.id, returnUrl)}>View student <ArrowRight size={15} aria-hidden="true" /></a>
+          </article>
+        ))}
+      </div>
+    </>
+  );
 }
 
 export default function AdminStudentManagementPage() {

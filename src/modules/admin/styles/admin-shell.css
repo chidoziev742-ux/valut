@@ -59,7 +59,7 @@
   .admin-account-copy small { font-size: 9px; }
   .admin-account-state { display: none; }
   .admin-mobile-nav { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; padding: 9px 12px; border-bottom: 1px solid #e7e8df; background: #fffefa; }
-  .admin-mobile-nav .admin-shell-link-compact { min-height: 43px; justify-content: center; gap: 6px; padding: 0 6px; border-color: transparent; border-radius: 8px; color: #42584a; background: transparent; font-size: 10px; }
+  .admin-mobile-nav .admin-shell-link-compact { min-width: 0; min-height: 43px; flex-direction: column; justify-content: center; gap: 4px; padding: 6px 2px; border-color: transparent; border-radius: 8px; color: #42584a; background: transparent; font-size: 10px; white-space: normal; text-align: center; }
   .admin-mobile-nav .admin-shell-link-compact:hover:not(.is-active) { color: #173b32; background: #e5efe9; }
   .admin-mobile-nav .admin-shell-link-compact.is-active, .admin-mobile-nav .admin-shell-link-compact.is-active:hover { border-color: #d2e1d5; color: #fff; background: linear-gradient(105deg, #287655, #205d45); }
   .admin-mobile-nav .admin-shell-link-compact:active:not(.is-active) { color: #173b32; background: #d7e5d8; transform: scale(.98); }
